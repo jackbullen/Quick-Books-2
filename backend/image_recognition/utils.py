@@ -5,6 +5,10 @@ Utilities for image segmentation
 import cv2
 import math
 import numpy as np
+from typing import List, Tuple
+
+Point = Tuple[float, float]
+Line = Tuple[Point, Point]
 
 def resize_img(image, new_width=1200):
     """Resizes to width while maintaining the aspect ratio"""
@@ -53,7 +57,7 @@ def polarlines_to_startendpts(lines, length):
 
     return points
 
-def dist(x, y):
+def dist(x: Point, y: Point):
     """Return max distance between two lines x coords and y coords"""
     return max(abs(x[0]-y[0]), abs(x[1]-y[1]))
 
@@ -63,9 +67,8 @@ def group_lines(lines, tolerance=100):
     for line in lines:
         added = 0 
         for group in groups:
-            # print(line[0], group[0][0], dist(line[0], group[0][0]))
+            print(line[0], group[0][0], dist(line[0], group[0][0]))
             if dist(line[0], group[0][0]) < tolerance:
-                # print("HIIHIFHIHD")
                 group.append(line)
                 added = 1
                 break
@@ -88,13 +91,14 @@ def average_lines(grouped_lines):
         y_right = [pt[1] for pt in right_points]
         avg_x_right = int(sum(x_right) / len(x_right))
         avg_y_right = int(sum(y_right) / len(y_right))
-
-        averaged_lines.append(((avg_x_left, avg_y_left), (avg_x_right, avg_y_right)))
+        averaged_lines.append(((x_left[0], y_left[0]), (x_right[0], y_right[0])))
+        # averaged_lines.append(((avg_x_left, avg_y_left), (avg_x_right, avg_y_right)))
 
     return averaged_lines
 
-def smooth_lines(lines, tolerance=100):
-    groups = group_lines(lines, tolerance=tolerance)
+def smooth_lines(lines: List[List[Line]], tolerance=100) -> List[Line]:
+    """Groups then averages a list of groups of lines"""
+    groups = group_lines(sorted(lines, key=lambda x: x[0][0]), tolerance=tolerance)
     avg_lines = average_lines(groups)
     return avg_lines
 

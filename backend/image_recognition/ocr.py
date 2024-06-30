@@ -13,21 +13,34 @@ load_dotenv()
 
 # Make Computer Vision Client
 cv_client = ImageAnalysisClient(
-    endpoint=os.getenv("endpoint"),
-    credential=AzureKeyCredential(key=os.getenv("key")))
+    endpoint=os.getenv("AZURE_AI_ENDPOINT"),
+    credential=AzureKeyCredential(key=os.getenv("AZURE_AI_KEY")))
+
+images_path = "images/spine_images"
+image_name = "spine12_1test4.jpeg"
 
 # Send the image to the client and get READ VisualFeatures
-with open("old/test2.jpg", "rb") as f:
-    img_bytes = f.read()
-    result = cv_client.analyze(image_data=img_bytes,
-                               visual_features=[VisualFeatures.READ,
-                                                VisualFeatures.OBJECTS])
-
+# with open(os.path.join(images_path, image_name), "rb") as f:
+#     img_bytes = f.read()
+#     result = cv_client.analyze(image_data=img_bytes,
+#                                visual_features=[VisualFeatures.READ,
+#                                                 VisualFeatures.OBJECTS])
 # Save result to JSON
-with open("result.json", "w") as f:
-    f.write(json.dumps(result.as_dict(), indent=4))
+# with open("result.json", "w") as f:
+#     f.write(json.dumps(result.as_dict(), indent=4))
 
+# Analyze result 
+# (for now just get it from json to avoid calling repeatedly on test image)
 
+def analyze_result(result):
+    text = ""
+    for block in result['readResult']['blocks']:
+        text += "\n".join([line['text'] for line in block['lines']]) + "\n"
+    return text
+
+with open("result.json", "r") as f:
+    result = json.load(f)
+print(analyze_result(result))
 # Annotate results onto the image
 # image = Image.open("old/test2.jpg")
 # fig = plt.figure(figsize=(image.width/100, image.height/100))
