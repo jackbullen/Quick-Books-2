@@ -68,7 +68,7 @@ plt.show()
 #     ((_, y), (_, _)) = line
 #     segments.append(image[prev_y:y, :, :])
 #     print(prev_y, y, image[prev_y:y, :, :].shape)
-#     cv2.imwrite(f"segmented_images/{i}{image_name}", image[prev_y:y, :, :])
+#     cv2.imwrite(f"images/shelf_images/{i}{image_name}", image[prev_y:y, :, :])
 #     prev_y = y
 # segments.append(image[prev_y:, :, :])
 

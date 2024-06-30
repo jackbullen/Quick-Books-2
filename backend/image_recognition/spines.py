@@ -53,10 +53,21 @@ lines = smooth_lines(lines, tolerance=50)
 # Rescale to the original image size
 lines = rescale_lines(lines, image.shape, img.shape)
 
-# Plot the lines on the image
-for line in lines:
-    ((x1, y1), (x2, y2)) = line
-    image = cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 10)
-plt.figure(figsize=(10, 10))
-plt.imshow(image)
-plt.show()
+# # Plot the lines on the image
+# for line in lines:
+#     ((x1, y1), (x2, y2)) = line
+#     image = cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 10)
+# plt.figure(figsize=(10, 10))
+# plt.imshow(image)
+# plt.show()
+
+# Segment the image
+segments = []
+prev_y = 0
+for i, line in enumerate(sorted(lines, key=lambda x: x[0][1])):
+    ((_, y), (_, _)) = line
+    segments.append(image[prev_y:y, :, :])
+    print(prev_y, y, image[prev_y:y, :, :].shape)
+    cv2.imwrite(f"images/spine_images/{i}{image_name}", image[prev_y:y, :, :])
+    prev_y = y
+segments.append(image[prev_y:, :, :])
