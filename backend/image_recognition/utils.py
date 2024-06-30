@@ -1,18 +1,21 @@
+"""
+Utilities for image segmentation
+"""
+
 import cv2
 import math
 import numpy as np
 
-def resize_img(image):
-    """Resizes to width of 500 while maintaining the aspect ratio"""
+def resize_img(image, new_width=1200):
+    """Resizes to width while maintaining the aspect ratio"""
     img = image.copy()
     img_ht, img_wd, _ = img.shape
     ratio = img_ht / img_wd
-    new_width = 1200
     new_height = math.ceil(new_width * ratio)
     img = cv2.resize(img, (new_width, new_height))
     return img
 
-def polarlines_to_startendpts(lines, ht, wd):
+def polarlines_to_startendpts(lines, length):
     """
     Converts a line that is described by an angle and distance from origin
     to a line that is described by its start and end points.
@@ -37,10 +40,10 @@ def polarlines_to_startendpts(lines, ht, wd):
         y0 = b * r
         
         # Compute start and end points of the line by 
-        x1 = int(x0 - (ht)*c)
-        y1 = int(y0 - (ht)*d)
-        x2 = int(x0 + (ht)*c)
-        y2 = int(y0 + (ht)*d)
+        x1 = int(x0 - (length)*c)
+        y1 = int(y0 - (length)*d)
+        x2 = int(x0 + (length)*c)
+        y2 = int(y0 + (length)*d)
         
         points.append(((x1, y1), (x2, y2)))
     
@@ -54,13 +57,15 @@ def dist(x, y):
     """Return max distance between two lines x coords and y coords"""
     return max(abs(x[0]-y[0]), abs(x[1]-y[1]))
 
-def group_lines(lines, tolerance=80):
-    """Group lines if they are within tolerance pixels in the x coordinate"""
+def group_lines(lines, tolerance=100):
+    """Group lines if they are within tolerance pixels in the use coordinate"""
     groups = []
     for line in lines:
         added = 0 
         for group in groups:
+            # print(line[0], group[0][0], dist(line[0], group[0][0]))
             if dist(line[0], group[0][0]) < tolerance:
+                # print("HIIHIFHIHD")
                 group.append(line)
                 added = 1
                 break
@@ -88,8 +93,8 @@ def average_lines(grouped_lines):
 
     return averaged_lines
 
-def smooth_lines(lines):
-    groups = group_lines(lines)
+def smooth_lines(lines, tolerance=100):
+    groups = group_lines(lines, tolerance=tolerance)
     avg_lines = average_lines(groups)
     return avg_lines
 
